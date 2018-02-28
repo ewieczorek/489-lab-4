@@ -30,20 +30,24 @@ int main(int argc, char** argv){
 	listen(sersock, 10);
 
 	while(1){
-		char buffer[1024];
-		int buff_size = 1024;
-
-		consock = accept(sersock, (struct sockaddr *) &clientaddr, &len);
-
-		FILE *uptime_file = popen("uptime", "r");
-		fgets(buffer, buff_size, uptime_file);
-		pclose(uptime_file);
 		
-		write(consock, buffer, buff_size);
+		consock = accept(sersock, (struct sockaddr *) &clientaddr, &len);
+		if (!fork()){
+			char buffer[1024];
+			int buff_size = 1024;
+
+			FILE *uptime_file = popen("uptime", "r");
+			fgets(buffer, buff_size, uptime_file);
+			pclose(uptime_file);
+			
+			write(consock, buffer, buff_size);
 	
-		close(consock);		
-	}	
-	
+			close(consock);		
+		}
+		else{
+			close(consock);
+		}	
+	}
 	close(sersock);
 
 	return 0;
